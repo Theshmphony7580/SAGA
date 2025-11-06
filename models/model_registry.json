@@ -1,0 +1,23 @@
+{
+  "version": "2.0",
+  "models": {
+    "column_semantics": {
+      "name": "SentenceTransformer-MiniLM",
+      "path": "models/trained/column_semantics/"
+    },
+    "imputation_selector": {
+      "name": "LightGBM",
+      "path": "models/trained/imputation_selector/"
+    },
+    "outlier_detector": {
+      "name": "IsolationForest",
+      "path": "models/trained/outlier_detector/"
+    },
+    "chart_recommender": {
+      "name": "Classifier",
+      "path": "models/trained/chart_recommender/"
+    }
+  }
+}
+
+
