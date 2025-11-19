@@ -30,6 +30,10 @@ async def upload_dataset(file: UploadFile = File(...)) -> UploadResponse:
     if file.content_type and file.content_type not in ALLOWED_MIME_TYPES:
         raise HTTPException(status_code=400, detail="Invalid content type")
 
+    result = await file.read(file)
+    stored_path = result["stored_path"]
+    dataset_id = result["dataset_id"]
+
     # size check (read first then enforce)
     stored_path = await save_temp_file(file)
     try:
@@ -47,6 +51,7 @@ async def upload_dataset(file: UploadFile = File(...)) -> UploadResponse:
         delimiter = sniff_delimiter(stored_path)
 
     return UploadResponse(
+        dataset_id=dataset_id,
         filename=filename,
         stored_path=stored_path,
         delimiter=delimiter,

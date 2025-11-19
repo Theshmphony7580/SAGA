@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Dict, Any
 from backend.ml.cleaning import clean_dataset
 from pandas.errors import ParserError
-from backend.utils.data_utils import CSVValidationError
+from backend.utils.file_utils import CSVValidationError
 
 router = APIRouter(tags=["clean"])
 
