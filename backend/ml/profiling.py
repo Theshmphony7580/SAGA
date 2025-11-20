@@ -5,7 +5,7 @@ from typing import Dict, Any
 import os
 from backend.utils.data_utils import read_dataframe_auto
 
-def infer_sementic_type(series: pd.Series) -> str:
+def infer_semantic_type(series: pd.Series) -> str:
     sampale = series.dropna().astype(str)
     if sampale.empty:
         return "unknown"
@@ -47,7 +47,6 @@ def basic_profile(df: pd.DataFrame) -> Dict[str, Any]:
     return profile
 
 
-
 def generate_profile(dataset_id: str) -> Dict[str, Any]:
     """Main entry: load dataset by id, profile it, return structured JSON."""
     path = get_dataset_path(dataset_id)
@@ -69,31 +68,3 @@ def generate_profile(dataset_id: str) -> Dict[str, Any]:
         "dataset_id": dataset_id,
         "profile": profile
     }
-
-
-
-
-#def generate_profile(path: str) -> Dict[str, Any]:
-    if not os.path.exists(path):
-        raise FileNotFoundError(path)
-
-    df = read_dataframe_auto(path, strict=False)
-
-    summary: Dict[str, Any] = {
-        "num_rows": int(df.shape[0]),
-        "num_columns": int(df.shape[1]),
-        "columns": {},
-    }
-
-    for col in df.columns:
-        col_data = df[col]
-        summary["columns"][col] = {
-            "dtype": str(col_data.dtype),
-            "missing": int(col_data.isna().sum()),
-            "unique": int(col_data.nunique(dropna=True)),
-            "sample": col_data.dropna().head(3).tolist(),
-        }
-
-    return summary
-
-
