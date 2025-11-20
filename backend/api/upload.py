@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from backend.utils.file_utils import save_temp_file, sniff_delimiter
+from backend.utils.file_utils import save_dataset, sniff_delimiter
 from backend.utils.security import sanitize_text
 from backend.config import MAX_FILE_SIZE_MB, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES
 import os
@@ -11,8 +11,9 @@ router = APIRouter(tags=["upload"])
 
 
 class UploadResponse(BaseModel):
+    dataset_id: str
     filename: str
-    stored_path: str
+    file_path: str
     delimiter: Optional[str]
     message: str
 
@@ -30,22 +31,24 @@ async def upload_dataset(file: UploadFile = File(...)) -> UploadResponse:
     if file.content_type and file.content_type not in ALLOWED_MIME_TYPES:
         raise HTTPException(status_code=400, detail="Invalid content type")
 
-    result = await file.read(file)
-    stored_path = result["stored_path"]
-    dataset_id = result["dataset_id"]
+    # Save the file and get metadata
+    saved_file_info = await save_dataset(file)
+    dataset_id = saved_file_info["dataset_id"]
+    stored_path = saved_file_info["file_path"]
 
-    # size check (read first then enforce)
-    stored_path = await save_temp_file(file)
+    # Size check
     try:
-        size_mb = (os.path.getsize(stored_path) / (1024 * 1024))
+        size_mb = os.path.getsize(stored_path) / (1024 * 1024)
     except Exception:
         size_mb = 0
+    
     if size_mb > MAX_FILE_SIZE_MB:
         try:
             os.remove(stored_path)
         except Exception:
             pass
         raise HTTPException(status_code=413, detail=f"File too large (> {MAX_FILE_SIZE_MB} MB)")
+
     delimiter = None
     if stored_path.lower().endswith(".csv"):
         delimiter = sniff_delimiter(stored_path)
@@ -53,7 +56,7 @@ async def upload_dataset(file: UploadFile = File(...)) -> UploadResponse:
     return UploadResponse(
         dataset_id=dataset_id,
         filename=filename,
-        stored_path=stored_path,
+        file_path=stored_path,
         delimiter=delimiter,
         message="File uploaded successfully",
     )
