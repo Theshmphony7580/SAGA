@@ -3,10 +3,17 @@ import numpy as np
 import os
 import pandas as pd
 from backend.utils.file_utils import get_dataset_path,sniff_delimiter
-from backend.ml.profiling import load_dataset
+from backend.utils.data_utils import read_dataframe_auto
+
 
 CLEANED_DIR = "backend/storage/cleaned"
 os.makedirs(CLEANED_DIR, exist_ok=True)
+
+def load_raw_dataset(dataset_id: str) -> pd.DataFrame:
+    path = get_dataset_path(dataset_id)
+    if not path:
+        raise FileNotFoundError(f"Dataset {dataset_id} not found")
+    return read_dataframe_auto(path, strict=False)
 
 def fill_missing_values(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     log = {"missing_values_filled": {}}
@@ -61,7 +68,7 @@ def save_cleaned_dataset(dataset_id: str, df: pd.DataFrame) -> str:
     return cleaned_path
 
 def clean_dataset(dataset_id: str) -> Dict[str, Any]:
-    df = load_dataset(dataset_id)
+    df = load_raw_dataset(dataset_id)
 
     cleaning_log = {}
 
