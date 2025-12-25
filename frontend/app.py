@@ -6,7 +6,7 @@ import pandas as pd
 # -------------------------------------
 # BASIC CONFIG
 # -------------------------------------
-BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000/v1")
+BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000/v1/api")
 
 st.set_page_config(page_title="AI Data Agent", layout="wide")
 st.title("AI-Powered Data Analytics Assistant")
@@ -35,10 +35,8 @@ if uploaded and st.button("Upload"):
 
     if r.ok:
         data = r.json()
-        # backend returns stored_path = backend/storage/datasets/<dataset_id>.csv
         st.write("DEBUG upload response:", data)
-        stored = data["file_path"]
-        dataset_id = os.path.splitext(os.path.basename(stored))[0]
+        dataset_id = data["dataset_id"]
         st.session_state["dataset_id"] = dataset_id
 
         st.success(f"Uploaded successfully!")
@@ -62,7 +60,7 @@ st.write(f"**Current Dataset ID:** `{dataset_id}`")
 st.subheader("2. Profile Dataset")
 
 if st.button("Generate Profile"):
-    r = requests.get(f"{API()}/profile/{dataset_id}")
+    r = requests.get(f"{API()}/profile?dataset_id={dataset_id}")
 
     if r.ok:
         st.json(r.json())
