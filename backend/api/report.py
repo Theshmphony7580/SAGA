@@ -14,7 +14,7 @@ class ReportSection(BaseModel):
 
 
 class ReportRequest(BaseModel):
-    path: str
+    dataset_id: str
     sections: List[ReportSection] = []
     include_charts: bool = True
     format: str = "pdf"  # pdf or xlsx
@@ -28,7 +28,7 @@ class ReportResponse(BaseModel):
 async def report_export(req: ReportRequest) -> ReportResponse:
     try:
         out_path = export_report(
-            dataset_path=req.path,
+            dataset_id=req.dataset_id,
             sections=[s.dict() for s in req.sections],
             include_charts=req.include_charts,
             output_format=req.format,
