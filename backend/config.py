@@ -9,6 +9,8 @@ APP_VERSION: str = "2.0"
 ROOT_DIR: str = os.getcwd()
 DATA_DIR: str = os.path.join(ROOT_DIR, "data")
 REPORTS_DIR: str = os.path.join(ROOT_DIR, "reports")
+DATABASE_DIR = os.path.join(DATA_DIR, "db")
+DATABASE_FILE: str = os.path.join(DATABASE_DIR, "analytics.db")
 
 # Upload constraints
 MAX_FILE_SIZE_MB: int = 200
@@ -23,9 +25,10 @@ ALLOWED_MIME_TYPES: List[str] = [
 ]
 
 # CORS
-ALLOWED_ORIGINS: List[str] = ["http://localhost:8501", "http://127.0.0.1:8501", "*"]
+ALLOWED_ORIGINS: List[str] = ["http://localhost:8501", "http://127.0.0.1:8501"]
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(REPORTS_DIR, exist_ok=True)
+os.makedirs(DATABASE_DIR, exist_ok=True)
 
 
