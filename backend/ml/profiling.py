@@ -1,9 +1,8 @@
 import re 
 import pandas as pd 
-from backend.utils.file_utils import get_dataset_path,sniff_delimiter
 from typing import Dict, Any
 import os
-from backend.utils.data_utils import read_dataframe_auto
+from backend.database.utils import get_table_name_for_dataset, read_dataframe_from_db
 
 def infer_semantic_type(series: pd.Series) -> str:
     sampale = series.dropna().astype(str)
@@ -48,21 +47,13 @@ def basic_profile(df: pd.DataFrame) -> Dict[str, Any]:
 
 
 def generate_profile(dataset_id: str) -> Dict[str, Any]:
-    """Main entry: load dataset by id, profile it, return structured JSON."""
-    path = get_dataset_path(dataset_id)
-    if not path or not os.path.exists(path):
-        raise FileNotFoundError(f"Dataset {dataset_id} not found at path {path}")
+    """Main entry: load dataset by id from the database, profile it, return structured JSON."""
+    table_name = get_table_name_for_dataset(dataset_id)
+    if not table_name:
+        raise FileNotFoundError(f"Dataset {dataset_id} not found in the database.")
 
-    # optionally adjust delimiter if CSV
-    if path.lower().endswith(".csv"):
-        delim = sniff_delimiter(path)
-        df = pd.read_csv(path, delimiter=delim or ",")
-    else:
-        df = pd.read_excel(path)
-
-    # or use read_dataframe_auto
-    # df = read_dataframe_auto(path, strict=False)
-
+    df = read_dataframe_from_db(table_name)
+    
     profile = basic_profile(df)
     return {
         "dataset_id": dataset_id,
