@@ -114,3 +114,38 @@ def find_cleaned_dataset_id(source_dataset_id: str) -> Optional[str]:
         return result['id'] if result else None
     finally:
         conn.close()
+        
+def delete_dataset(dataset_id: str) -> bool:
+    """
+    Deletes dataset metadata and drops the associated table.
+    Returns True if deleted, False if not found.
+    """
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+
+        # Fetch dataset metadata
+        cursor.execute(
+            "SELECT table_name FROM datasets WHERE id = ?",
+            (dataset_id,)
+        )
+        row = cursor.fetchone()
+        if not row:
+            return False
+
+        table_name = row["table_name"]
+
+        # Drop dataset table
+        cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
+
+        # Delete metadata
+        cursor.execute(
+            "DELETE FROM datasets WHERE id = ?",
+            (dataset_id,)
+        )
+
+        conn.commit()
+        return True
+    finally:
+        conn.close()
+
