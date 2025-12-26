@@ -107,11 +107,19 @@ def find_cleaned_dataset_id(source_dataset_id: str) -> Optional[str]:
     try:
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT id FROM datasets WHERE source_dataset_id = ? AND is_cleaned = TRUE ORDER BY upload_date DESC LIMIT 1",
+            "SELECT table_name FROM datasets WHERE source_dataset_id = ? AND is_cleaned = TRUE ORDER BY upload_date DESC LIMIT 1",
             (source_dataset_id,)
         )
         result = cursor.fetchone()
-        return result['id'] if result else None
+        
+        if result:
+            return result["table_name"]
+        cursor.execute(
+            "SELECT table_name FROM datasets WHERE id = ?",
+            (source_dataset_id,)
+        )
+        result = cursor.fetchone()
+        return result['table_name'] if result else None
     finally:
         conn.close()
         

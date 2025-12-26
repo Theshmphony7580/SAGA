@@ -7,35 +7,29 @@ router = APIRouter(tags=["nlq"])
 
 
 class NLQRequest(BaseModel):
+    dataset_id: str
     question: str
 
 
 class NLQResponse(BaseModel):
     dataset_id: str
-    code: str
-    result_summary: Optional[str]
-    result_table: Optional[List[Dict[str, Any]]]
+    table: str
+    sql: str
+    columns: List[str]
+    rows: List[Any]
+    row_count: int
 
 
 
-@router.post("/nlq/{dataset_id}", response_model=NLQResponse)
-async def nlq_run(dataset_id: str, req: NLQRequest) -> NLQResponse:
-    """
-    Executes a natural language query against the specified dataset.
-    It automatically uses the best available version of the dataset (cleaned, if available).
-    """
+@router.post("/nlq/run", response_model=NLQResponse)
+async def nlq_run(req: NLQRequest):
     try:
-        code, result_summary, result_table = run_nlq(dataset_id, req.question)
-        return NLQResponse(
-            dataset_id=dataset_id, 
-            code=code, 
-            result_summary=result_summary, 
-            result_table=result_table
-        )
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        return NLQResponse(**run_nlq(req.dataset_id, req.question))
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred during NLQ processing: {e}")
-
+        raise HTTPException(status_code=500, detail=str(e))
 
 
