@@ -1,8 +1,8 @@
 import re 
 import pandas as pd 
 from typing import Dict, Any
-import os
-from backend.database.utils import get_table_name_for_dataset, read_dataframe_from_db
+# import os
+# from backend.database.utils import get_table_name_for_dataset, read_dataframe_from_db
 
 def infer_semantic_type(series: pd.Series) -> str:
     sampale = series.dropna().astype(str)
@@ -46,16 +46,16 @@ def basic_profile(df: pd.DataFrame) -> Dict[str, Any]:
     return profile
 
 
-def generate_profile(dataset_id: str) -> Dict[str, Any]:
-    """Main entry: load dataset by id from the database, profile it, return structured JSON."""
-    table_name = get_table_name_for_dataset(dataset_id)
-    if not table_name:
-        raise FileNotFoundError(f"Dataset {dataset_id} not found in the database.")
+# def generate_profile(dataset_id: str) -> Dict[str, Any]:
+#     """Main entry: load dataset by id from the database, profile it, return structured JSON."""
+#     table_name = get_table_name_for_dataset(dataset_id)
+#     if not table_name:
+#         raise FileNotFoundError(f"Dataset {dataset_id} not found in the database.")
 
-    df = read_dataframe_from_db(table_name)
+#     df = read_dataframe_from_db(table_name)
     
-    profile = basic_profile(df)
-    return {
-        "dataset_id": dataset_id,
-        "profile": profile
-    }
+#     profile = basic_profile(df)
+#     return {
+#         "dataset_id": dataset_id,
+#         "profile": profile
+#     }
