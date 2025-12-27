@@ -3,6 +3,12 @@ import requests
 import streamlit as st
 import pandas as pd
 
+if "dataset_id" in st.session_state:
+    if st.session_state["dataset_id"].startswith("dataset_"):
+        st.error("FATAL: dataset_id is a table_name, not a UUID")
+        st.stop()
+
+
 # -------------------------------------
 # BASIC CONFIG
 # -------------------------------------
@@ -90,8 +96,7 @@ st.subheader("4. Auto Insights")
 
 if st.button("Generate Insights"):
     r = requests.post(
-        f"{API()}/insights",
-        json={"dataset_id": dataset_id}
+        f"{API()}/insights/{dataset_id}",
     )
 
     if r.ok:
