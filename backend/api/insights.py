@@ -5,6 +5,9 @@ from backend.ml.insights_engine import generate_insights
 
 router = APIRouter(tags=["insights"])
 
+class InsightsRequest(BaseModel):
+    dataset_id: str
+
 class InsightsResponse(BaseModel):
     dataset_id: str
     num_rows: int
@@ -14,15 +17,15 @@ class InsightsResponse(BaseModel):
     category_insights: Dict[str, Any]
     extremes: Dict[str, Any]
 
-@router.get("/insights/{dataset_id}", response_model=InsightsResponse)
-async def insights_auto(dataset_id: str) -> InsightsResponse:
+@router.post("/insights", response_model=InsightsResponse)
+async def insights_auto(request: InsightsRequest):
     """
     Generates and returns a set of automated insights for the specified dataset.
     It will automatically use the latest cleaned version of the dataset if available.
     """
     try:
-        result = generate_insights(dataset_id)
-        return InsightsResponse(**result)
+        # result = generate_insights(dataset_id)
+        return InsightsResponse(**generate_insights(request.dataset_id))
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:

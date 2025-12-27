@@ -89,7 +89,10 @@ if st.button("Run Cleaning"):
 st.subheader("4. Auto Insights")
 
 if st.button("Generate Insights"):
-    r = requests.get(f"{API()}/insights/{dataset_id}")
+    r = requests.post(
+        f"{API()}/insights",
+        json={"dataset_id": dataset_id}
+    )
 
     if r.ok:
         resp = r.json()
@@ -119,8 +122,8 @@ if st.button("Run NLQ"):
 
     if r.ok:
         data = r.json()
-        st.markdown("### Generated SQL")
-        st.code(data["sql"], language="sql")
+        # st.markdown("### Generated SQL")
+        # st.code(data["sql"], language="sql")
         
         # if data.get("result_summary"):
         #     st.info(data["result_summary"])
