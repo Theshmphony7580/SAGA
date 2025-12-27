@@ -1,24 +1,19 @@
 from typing import Any, Dict
 import pandas as pd
 import numpy as np
-from backend.database.utils import (
-    get_table_name_for_dataset, 
-    read_dataframe_from_db,
-    find_cleaned_dataset_id
-)
-
-def load_best_dataset(dataset_id: str) -> pd.DataFrame:
-    """
-    Loads the best available version of a dataset (cleaned, if available).
-    """
-    cleaned_id = find_cleaned_dataset_id(dataset_id)
-    load_id = cleaned_id if cleaned_id else dataset_id
+from backend.database.utils import resolve_best_table_name, read_dataframe_from_db
+# def load_best_dataset(dataset_id: str) -> pd.DataFrame:
+#     """
+#     Loads the best available version of a dataset (cleaned, if available).
+#     """
+#     cleaned_id = find_cleaned_dataset_id(dataset_id)
+#     load_id = cleaned_id if cleaned_id else dataset_id
     
-    table_name = get_table_name_for_dataset(load_id)
-    if not table_name:
-        raise FileNotFoundError(f"Dataset with ID {load_id} not found in database.")
+#     table_name = get_table_name_for_dataset(load_id)
+#     if not table_name:
+#         raise FileNotFoundError(f"Dataset with ID {load_id} not found in database.")
         
-    return read_dataframe_from_db(table_name)
+#     return read_dataframe_from_db(table_name)
 
 def numeric_summary(df: pd.DataFrame) -> Dict[str, Any]:
     summary = {}
@@ -92,7 +87,8 @@ def generate_insights(dataset_id: str) -> Dict[str, Any]:
     """
     Generates a set of analytical insights for a given dataset from the database.
     """
-    df = load_best_dataset(dataset_id)
+    table_name = resolve_best_table_name(dataset_id)
+    df = read_dataframe_from_db(table_name)
 
     return {
         "dataset_id": dataset_id,

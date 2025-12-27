@@ -1,12 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Any, Dict
+from typing import List, Dict, Any
 from backend.ml.insights_engine import generate_insights
 
 router = APIRouter(tags=["insights"])
 
-class InsightsRequest(BaseModel):
-    dataset_id: str
 
 class InsightsResponse(BaseModel):
     dataset_id: str
@@ -17,16 +15,18 @@ class InsightsResponse(BaseModel):
     category_insights: Dict[str, Any]
     extremes: Dict[str, Any]
 
-@router.post("/insights", response_model=InsightsResponse)
-async def insights_auto(request: InsightsRequest):
-    """
-    Generates and returns a set of automated insights for the specified dataset.
-    It will automatically use the latest cleaned version of the dataset if available.
-    """
+
+@router.post("/insights/{dataset_id}", response_model=InsightsResponse)
+async def insights_auto(dataset_id: str):
     try:
-        # result = generate_insights(dataset_id)
-        return InsightsResponse(**generate_insights(request.dataset_id))
+        # insights = generate_insights(dataset_id)
+        return generate_insights(dataset_id)
+
+        # return InsightsResponse(
+        #     dataset_id=dataset_id,
+        #     insights=insights
+        # )
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred during insight generation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
