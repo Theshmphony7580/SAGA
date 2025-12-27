@@ -113,20 +113,24 @@ question = st.text_input("Ask a question about your data:")
 
 if st.button("Run NLQ"):
     r = requests.post(
-        f"{API()}/nlq/{dataset_id}",
-        json={"question": question}
+        f"{API()}/nlq/run",
+        json={"dataset_id": dataset_id, "question": question}
     )
 
     if r.ok:
         data = r.json()
-        st.code(data["code"], language="python")
+        st.markdown("### Generated SQL")
+        st.code(data["sql"], language="sql")
+        
+        # if data.get("result_summary"):
+        #     st.info(data["result_summary"])
 
-        if data.get("result_summary"):
-            st.info(data["result_summary"])
-
-        if data.get("result_table"):
-            df = pd.DataFrame(data["result_table"])
+        if data["rows"]:
+            df = pd.DataFrame(data["rows"], columns=data["columns"])
+            st.markdown(f"### Result ({data['row_count']} rows)")
             st.dataframe(df)
+        else:
+            st.info("Query executed successfully, but returned no rows.")
     else:
         st.error(r.text)
 
