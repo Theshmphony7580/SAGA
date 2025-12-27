@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 import os
 import pandas as pd
-from backend.ml.insights_engine import load_best_dataset
+from backend.database.utils import find_cleaned_dataset_id, get_table_name_for_dataset, read_dataframe_from_db
 from backend.config import REPORTS_DIR
 
 def export_report(dataset_id: str, sections: List[Dict[str, Any]], include_charts: bool, output_format: str) -> str:
@@ -9,7 +9,7 @@ def export_report(dataset_id: str, sections: List[Dict[str, Any]], include_chart
     Exports a report for a given dataset to either XLSX or HTML format.
     The data is loaded from the database, using the best available version.
     """
-    df = load_best_dataset(dataset_id)
+    df = read_dataframe_from_db(get_table_name_for_dataset(dataset_id))
 
     # Ensure the reports directory exists
     os.makedirs(REPORTS_DIR, exist_ok=True)
