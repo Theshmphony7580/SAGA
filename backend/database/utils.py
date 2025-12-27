@@ -101,27 +101,40 @@ def get_table_name_for_dataset(dataset_id: str) -> Optional[str]:
 
 def find_cleaned_dataset_id(source_dataset_id: str) -> Optional[str]:
     """
-    Finds the most recent cleaned dataset ID for a given source dataset.
+    Returns the cleaned dataset_id (UUID) if available.
     """
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT table_name FROM datasets WHERE source_dataset_id = ? AND is_cleaned = TRUE ORDER BY upload_date DESC LIMIT 1",
+            """
+            SELECT id FROM datasets
+            WHERE source_dataset_id = ? AND is_cleaned = TRUE
+            ORDER BY upload_date DESC
+            LIMIT 1
+            """,
             (source_dataset_id,)
         )
-        result = cursor.fetchone()
-        
-        if result:
-            return result["table_name"]
-        cursor.execute(
-            "SELECT table_name FROM datasets WHERE id = ?",
-            (source_dataset_id,)
-        )
-        result = cursor.fetchone()
-        return result['table_name'] if result else None
+        row = cursor.fetchone()
+        return row["id"] if row else None
     finally:
         conn.close()
+        
+def resolve_best_table_name(dataset_id: str) -> str:
+    """
+    Resolves the correct table_name for a dataset.
+    Prefers cleaned version if available.
+    """
+    cleaned_id = find_cleaned_dataset_id(dataset_id)
+    final_id = cleaned_id if cleaned_id else dataset_id
+
+    metadata = get_dataset_metadata(final_id)
+    if not metadata:
+        raise FileNotFoundError(f"Dataset with ID {final_id} not found in database.")
+
+    return metadata["table_name"]
+
+
         
 def delete_dataset(dataset_id: str) -> bool:
     """
