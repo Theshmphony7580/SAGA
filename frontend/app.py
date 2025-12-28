@@ -69,7 +69,21 @@ if st.button("Generate Profile"):
     r = requests.get(f"{API()}/profile?dataset_id={dataset_id}")
 
     if r.ok:
-        st.json(r.json())
+        profile_json = r.json()
+        profile_to_tabular_display = pd.DataFrame(profile_to_tabular_display := [
+            {
+                "Column": col,
+                "Data Type": details["dtype"],
+                "Missing Count": details["missing_count"],
+                "Missing %": details["missing_pct"],
+                "Unique Count": details["unique_count"],
+                "Semantic Type": details["semantic_type"],
+            }
+            for col, details in profile_json["profiling"]["columns"].items()
+        ])
+        # st.markdown("### Dataset Profile")
+        # st.json(profile_json)
+        st.dataframe(profile_to_tabular_display)
     else:
         st.error(r.text)
 

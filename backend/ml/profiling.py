@@ -40,7 +40,7 @@ def basic_profile(df: pd.DataFrame) -> Dict[str, Any]:
             "missing_pct": round(float(col_data.isna().mean()), 3),
             "unique_count": int(col_data.nunique(dropna=True)),
             "semantic_type": infer_semantic_type(col_data),
-            "sample_values": col_data.dropna().head(20).tolist()
+            # "sample_values": col_data.dropna().head(20).tolist()
         }
 
     return profile
