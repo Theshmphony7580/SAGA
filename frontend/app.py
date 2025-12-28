@@ -123,12 +123,30 @@ if st.button("Generate Insights"):
     )
 
     if r.ok:
-        resp = r.json()
-        st.json(resp)
+        # resp = r.json()
+        # st.json(resp)
+        insights_json = r.json()
+        st.write("### Insights Report")
+        insights_to_tabular_display = pd.DataFrame(insights_to_tabular_display := [
+            {
+                # str(value["mean"]) : str(value),
+                "Inight values" : str(key),
+                "Mean" : str(value["mean"]),
+                "Median" : str(value["median"]),
+                "Std Dev": str(value["std"]),
+                "Min": str(value["min"]),
+                "Max": str(value["max"]),
+                "25%": str(value["25%"]),
+                "75%": str(value["75%"]),
+                # "Details": str(value)
+            }
+            for key, value in insights_json["numeric_summary"].items()
+        ])
+        st.dataframe(insights_to_tabular_display)
 
         # Optional correlation heatmap
-        if resp.get("correlations"):
-            corr_df = pd.DataFrame(resp["correlations"])
+        if insights_json.get("correlations"):
+            corr_df = pd.DataFrame(insights_json["correlations"])
             st.write("### Correlation Heatmap")
             st.dataframe(corr_df)
     else:
