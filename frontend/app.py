@@ -108,6 +108,9 @@ if st.button("Run Cleaning"):
             {
                 "Issue": issue,
                 "Details": details
+                
+                # "Details": pd.json_normalize(details).to_dict(orient="records")[0]
+
             }
             for issue, details in cleaning_json["report"].items()
         ])
