@@ -98,7 +98,16 @@ if st.button("Run Cleaning"):
 
     if r.ok:
         st.success("Cleaning Completed!")
-        st.json(r.json())
+        cleaning_json = r.json()
+        st.write("### Cleaning Report")
+        cleaning_to_tabular_display = pd.DataFrame(cleaning_to_tabular_display := [
+            {
+                "Issue": issue,
+                "Details": details
+            }
+            for issue, details in cleaning_json["report"].items()
+        ])
+        st.dataframe(cleaning_to_tabular_display)
     else:
         st.error(r.text)
 
