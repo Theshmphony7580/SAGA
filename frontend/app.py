@@ -40,19 +40,19 @@ if uploaded and st.button("Upload"):
     r = requests.post(f"{API()}/upload", files=files)
 
     if r.ok:
-        Upload_json = r.json()
-
-        st.success(Upload_json["message"])
-        st.info(f"Dataset ID: {dataset_id}")
-        st.info("File Name: " + uploaded.name )
-        # st.info("File Type: " + uploaded.type)
-        # st.write("DEBUG upload response:", Upload_json)
-        # dataset_id = Upload_json["dataset_id"]
-        # st.session_state["dataset_id"] = dataset_id
-
-        # st.success(f"Uploaded successfully!")
+        data = r.json()
+        dataset_id = data.get("dataset_id")
+        
+        if dataset_id:
+            st.session_state["dataset_id"] = dataset_id
+            st.success("File uploaded and processed successfully.")
+            st.info(f"Dataset ID: {dataset_id}")
+            st.info(f"File Name: {uploaded.name}")
+        else:
+            st.error("Upload succeeded but no dataset ID was returned.")
     else:
-        st.error(r.text)
+        st.error(f"Upload failed: {r.text}")
+
 
 
 # Stop if no dataset
