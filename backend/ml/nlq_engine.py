@@ -2,49 +2,41 @@ from typing import Tuple, Optional, Dict, Any
 import pandas as pd
 import re
 import sqlite3
-from backend.config import DATABASE_FILE
-from backend.database.utils import find_cleaned_dataset_id
 
-def nlq_to_sql (question: str, table_name: str) -> str:
+from streamlit import table
+from backend.config import DATABASE_FILE
+from backend.database.utils import find_cleaned_dataset_id , get_table_name_for_dataset
+
+def nlq_to_sql(question: str, table_name: str) -> str:
     """
     Converts a natural language question into an SQL query for the specified table.
-    This is a placeholder function. In a real application, this would use an NLP model.
+    This uses basic rule-based pattern matching for demo purposes.
     """
-    # Simple rule-based NLQ to SQL conversion (for demonstration purposes)
     q = question.lower().strip()
-    
-    
-    # show first N rows
-    m = re.match(r"show the first (\d+) rows", q)
+
+    # Match: "show first 5 rows", "display first 5 rows", etc.
+    m = re.search(r"(?:show|display|give|print)?\s*(?:me\s*)?(?:the\s*)?first\s+(\d+)\s+rows?", q)
     if m:
         n = int(m.group(1))
-        return f"SELECT * FROM {table_name} LIMIT {n}"
+        return f'SELECT * FROM "{table_name}" LIMIT {n}'
 
-    # show last N rows (SQLite-safe)
-    m = re.match(r"show the last (\d+) rows", q)
+
+    # Match: "show last 5 rows", "display last 5 rows", etc.
+    m = re.search(r"(?:show|display|give|print)?\s*(?:me\s*)?(?:the\s*)?last\s+(\d+)\s+rows?", q)
     if m:
         n = int(m.group(1))
-        return f"""
-            SELECT * FROM {table_name}
-            ORDER BY rowid DESC
-            LIMIT {n}
-        """
+        return f"SELECT * FROM {table_name} ORDER BY rowid DESC LIMIT {n}"
 
-    # what are the columns
-    if q == "what are the columns":
+    # Match: "what are the columns"
+    if "what are the columns" in q:
         return f"PRAGMA table_info({table_name})"
 
-    # describe the data
-    if q == "describe the data":
-        return f"""
-            SELECT
-              COUNT(*) as row_count
-            FROM {table_name}   
-              COUNT(*) as row_count
-            FROM {table_name}
-        """
+    # Match: "describe the data"
+    if "describe the data" in q:
+        return f"SELECT COUNT(*) as row_count FROM {table_name}"
 
     raise ValueError("Question not supported by NLQ engine")
+
 
     
 
@@ -53,7 +45,11 @@ def run_nlq(dataset_id: str, question: str) -> Dict[str, Any]:
     Executes a SAFE, READ-ONLY NLQ using SQL.
     """
 
-    table = find_cleaned_dataset_id(dataset_id)
+    cleaned_dataset_id = find_cleaned_dataset_id(dataset_id) or dataset_id
+    from backend.database.utils import get_table_name_for_dataset
+    table = get_table_name_for_dataset(cleaned_dataset_id)
+    if not table:
+        raise ValueError(f"No table found for dataset ID: {cleaned_dataset_id}")
     sql = nlq_to_sql(question, table)
 
     conn = sqlite3.connect(DATABASE_FILE)

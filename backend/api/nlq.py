@@ -28,7 +28,7 @@ async def nlq_run(req: NLQRequest):
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Dataset not found")
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail={"error": str(e)})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
