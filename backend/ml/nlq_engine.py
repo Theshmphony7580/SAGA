@@ -28,11 +28,13 @@ def nlq_to_sql(question: str, table_name: str) -> str:
         return f"SELECT * FROM {table_name} ORDER BY rowid DESC LIMIT {n}"
 
     # Match: "what are the columns"
-    if "what are the columns" in q:
+    m = re.search(r"(?:what\s+are\s+the\s+columns|list\s+the\s+columns|show\s+the\s+columns)", q)
+    if m:
         return f"PRAGMA table_info({table_name})"
 
     # Match: "describe the data"
-    if "describe the data" in q:
+    m = re.search(r"(?:describe\s+the\s+data|give\s+me\s+a\s+summary\s+of\s+the\s+data)", q)
+    if m:
         return f"SELECT COUNT(*) as row_count FROM {table_name}"
 
     raise ValueError("Question not supported by NLQ engine")
