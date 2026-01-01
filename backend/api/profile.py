@@ -1,23 +1,23 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
-from backend.ml.profiling import generate_profile as basic_profile
+from backend.ml.profiling import generate_profile 
 from backend.database.utils import get_dataset_metadata, read_dataframe_from_db 
 
 router = APIRouter(tags=["profile"])
 
 
-class ProfileResponse(BaseModel):
-    dataset_id: str
-    profiling: Dict[str, Any]
+# class ProfileResponse(BaseModel):
+#     dataset_id: str
+#     profiling: Dict[str, Any]
 
 
-@router.get("/profile", response_model=ProfileResponse)
-async def profile_dataset(dataset_id: str) -> ProfileResponse:
+@router.get("/profile")     
+async def profile_dataset(dataset_id: str):
     
     
     try:
-        return basic_profile(dataset_id)
+        return generate_profile(dataset_id)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:

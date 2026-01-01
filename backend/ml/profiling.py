@@ -12,6 +12,7 @@ def generate_profile(dataset_id: str) -> Dict[str, Any]:
     df = read_dataframe_from_db(table)
 
     ml_profile = generate_ml_profile(df)
+    print("Generated ML profile:", ml_profile)
 
     return {
         "dataset_id": dataset_id,
