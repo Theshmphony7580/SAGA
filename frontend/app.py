@@ -63,33 +63,84 @@ if not st.session_state.get("dataset_id"):
 dataset_id = st.session_state.dataset_id
 st.write(f"**Current Dataset ID:** `{dataset_id}`")
 
-
 # -------------------------------------
-# 2️⃣ PROFILE
+# 2️⃣ PROFILE DATASET
 # -------------------------------------
 st.subheader("2. Profile Dataset")
 
 if st.button("Generate Profile"):
-    r = requests.get(f"{API()}/profile?dataset_id={dataset_id}")
+    r = requests.get(
+        f"{API()}/profile",
+        params={"dataset_id": dataset_id}
+    )
 
     if r.ok:
-        profile_json = r.json()
-        profile_to_tabular_display = pd.DataFrame(profile_to_tabular_display := [
-            {
-                "Column": col,
-                "Data Type": details["dtype"],
-                "Missing Count": details["missing_count"],
-                "Missing %": details["missing_pct"],
-                "Unique Count": details["unique_count"],
-                "Semantic Type": details["semantic_type"],
-            }
-            for col, details in profile_json["profiling"]["columns"].items()
-        ])
-        # st.markdown("### Dataset Profile")
-        # st.json(profile_json)
-        st.dataframe(profile_to_tabular_display)
+        st.session_state["profile_response"] = r.json()
+        st.success("Profile generated successfully")
     else:
         st.error(r.text)
+
+# -------------------------------------
+# RENDER PROFILE (CORRECT LEVEL)
+# -------------------------------------
+if "profile_response" in st.session_state:
+    response = st.session_state["profile_response"]
+
+    if "profile" not in response:
+        st.error("Invalid profile response structure")
+        st.json(response)
+        st.stop()
+
+    profile = response["profile"]
+
+    # -------------------------------
+    # TABLE INFO
+    # -------------------------------
+    if "table" in profile:
+        st.markdown("### 📌 Dataset Overview")
+        table_df = pd.DataFrame(
+            [(k, str(v)) for k, v in profile["table"].items()],
+            columns=["Metric", "Value"]
+        )
+        st.table(table_df)
+
+    # -------------------------------
+    # VARIABLES
+    # -------------------------------
+    summary_df = pd.DataFrame(
+    profile["summary"].items(),
+    columns=["Metric", "Value"]
+    )
+    st.table(summary_df)
+    
+    
+    st.markdown("### 🔢 Numeric Columns")
+    st.dataframe(pd.DataFrame(
+    profile["numeric_columns"], columns=["Column"]
+    ))
+
+
+
+    # -------------------------------
+    # MISSING
+    # -------------------------------
+    st.markdown("### ⚠ Missing Values")
+    missing_df = pd.DataFrame(
+    profile["missing_summary"].items(),
+    columns=["Column", "Missing %"]
+    )
+    st.dataframe(missing_df)
+
+
+    # -------------------------------
+    # CORRELATIONS
+    # -------------------------------
+    if profile["strong_correlations"]:
+        st.dataframe(pd.DataFrame(profile["strong_correlations"]))
+    else:
+        st.info("No strong correlations found")
+# st.json(st.session_state.get("profile", {}))
+        
 
 
 # -------------------------------------
