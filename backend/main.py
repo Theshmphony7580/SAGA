@@ -37,7 +37,7 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=500, content={"status": "error", "message": "Internal Server Error"})
 
     # Routers are imported lazily to avoid circular imports
-    from backend.api import upload, profile, clean, insights, nlq, report, datasets
+    from backend.api import upload, profile, clean, insights, nlq, report, datasets, charts
 
     # Versioned API
     api_prefix = "/v1/api"
@@ -48,6 +48,7 @@ def create_app() -> FastAPI:
     app.include_router(nlq.router, prefix=api_prefix)
     app.include_router(report.router, prefix=api_prefix)
     app.include_router(datasets.router, prefix=api_prefix)
+    app.include_router(charts.router, prefix=api_prefix)
 
     @app.get("/health")
     async def health():
