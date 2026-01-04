@@ -243,7 +243,32 @@ if st.button("Run NLQ"):
 
 
 # -------------------------------------
-# 6️⃣ REPORT (COMING SOON)
+# 6 INSIGHTS
 # -------------------------------------
-st.subheader("6. Export Report (Coming Soon)")
+st.subheader("6. Recommended Charts")
+
+if st.button("Recommend Charts"):
+    r = requests.get(
+        f"{API()}/charts",
+        params={"dataset_id": dataset_id}
+    )
+
+    if r.ok:
+        charts_json = r.json()
+        st.write("### Recommended Charts")
+        charts_to_tabular_display = pd.DataFrame(charts_to_tabular_display := [
+            {
+                "Chart Type": chart.get("chart_type", "N/A"),
+                "Description": chart.get("description", "N/A")
+            }
+            for chart in charts_json["charts"]
+        ])
+        st.dataframe(charts_to_tabular_display)
+    else:
+        st.error(r.text)
+
+# -------------------------------------
+# 7 REPORT (COMING SOON)
+# -------------------------------------
+st.subheader("7. Export Report (Coming Soon)")
 st.info("Report API will be added after report pipeline is complete.")
