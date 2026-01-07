@@ -1,73 +1,20 @@
-from typing import List, Dict, Any
-import pandas as pd
+def recommend_chart_types(x_type: str, y_type: str | None):
+    if y_type is None:
+        if x_type == "numeric":
+            return ["histogram", "box"]
+        if x_type == "categorical":
+            return ["bar", "pie"]
 
-def recommend_chart_types(profile: Dict[str, Any]) -> List[Dict[str, List[str]]]:
-    """
-    Recommend chart types based on the ML profile of the dataset.
-    """
+    if x_type == "numeric" and y_type == "numeric":
+        return ["scatter", "line"]
 
-    charts = []
-    
-    numeric = profile.get("numeric_columns", [])
-    categorical = profile.get("categorical_columns", [])
-    high_card = profile.get("high_cardinality_columns", [])
-    correlations = profile.get("correlations", {})
-    
-    if categorical and numeric:
-        x = categorical[0]
-        y = numeric[0]
-        
-        if x not in high_card:
-            charts.append({
-                "chart_type": "Bar Chart",
-                "x": x,
-                "y": y,
-                "aggregation": "sum",
-                "reason": "Categorical vs Numeric",
-                "confidence": 0.85
-            })
-            
-    if len(numeric) >= 2:
-        charts.append({
-            "chart_type": "histogram",
-            "x": numeric[0],
-            "reason": "Distribution of Numeric Variable",
-            "confidence": 0.80
-        })
-        
-    for corr in correlations:
-        charts.append({
-            "chart_type": "Scatter Plot",
-            "x": corr["col1"],
-            "y": corr["col2"],
-            "reason": f"High correlation ({corr['correlation']}) between {corr['col1']} and {corr['col2']}",
-            "confidence": 0.90
-        })
-        
-    for cat in categorical:
-        if cat not in high_card:
-            charts.append({
-                "chart_type": "pie",
-                "x": cat,
-                "aggregation": "count",
-                "reason": "Low-cardinality categorical distribution",
-                "confidence": 0.75
-            })
-            break
-        
-    if not charts and numeric:
-        charts.append({
-            "chart_type": "line",
-            "x": "index",
-            "y": numeric[0],
-            "reason": "Fallback numeric trend",
-            "confidence": 0.60
-        })
-        
-    charts = pd.DataFrame(charts).to_dict(orient="records")
+    if x_type == "categorical" and y_type == "numeric":
+        return ["bar", "box"]
 
-    return charts
+    if x_type == "datetime" and y_type == "numeric":
+        return ["line"]
 
+    return []
     
     
     

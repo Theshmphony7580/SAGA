@@ -3,13 +3,19 @@ import requests
 import streamlit as st
 import pandas as pd
 
-if "dataset_id" in st.session_state:
-    if st.session_state["dataset_id"].startswith("dataset_"):
-        st.error("FATAL: dataset_id is a table_name, not a UUID")
-        st.stop()
+# if "dataset_id" in st.session_state:
+#     if st.session_state["dataset_id"].startswith("dataset_"):
+#         st.error("FATAL: dataset_id is a table_name, not a UUID")
+#         st.stop()
+        
+if "dataset_id" not in st.session_state:
+    st.session_state.dataset_id = None
+
+dataset_id = st.session_state.dataset_id
 
 
-# -------------------------------------
+
+# -------------------------------------0
 # BASIC CONFIG
 # -------------------------------------
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000/v1/api")
@@ -242,6 +248,7 @@ if st.button("Run NLQ"):
         st.error(r.text)
 
 
+
 # -------------------------------------
 # 6 INSIGHTS
 # -------------------------------------
@@ -266,6 +273,85 @@ if st.button("Recommend Charts"):
         st.dataframe(charts_to_tabular_display)
     else:
         st.error(r.text)
+
+# -------------------------------------
+# 6️⃣ FETCH DATASET COLUMNS
+# -------------------------------------
+st.subheader("6️⃣ Dataset Columns")
+
+r = requests.get(
+    f"{API()}/columns",
+    params={"dataset_id": dataset_id}
+)
+
+if not r.ok:
+    st.error(f"Failed to fetch columns: {r.text}")
+    st.stop()
+
+columns = r.json()["columns"]
+
+cols_df = pd.DataFrame(columns)
+st.dataframe(cols_df, use_container_width=True)
+
+
+# -------------------------------------
+# 7️⃣ CHART CONFIGURATION
+# -------------------------------------
+st.subheader("7️⃣ Create Your Own Chart")
+
+numeric_cols = [c["name"] for c in columns if c["type"] == "numeric"]
+all_cols = [c["name"] for c in columns]
+
+if not numeric_cols:
+    st.warning("No numeric columns available for charting.")
+    st.stop()
+
+x_col = st.selectbox("X Axis", all_cols)
+y_col = st.selectbox("Y Axis (Numeric)", numeric_cols)
+
+chart_type = st.selectbox(
+    "Chart Type",
+    ["line", "bar", "scatter"]
+)
+
+
+# -------------------------------------
+# 8️⃣ GENERATE CHART
+# -------------------------------------
+if st.button("Generate Chart"):
+    payload = {
+        "dataset_id": dataset_id,
+        "x": x_col,
+        "y": y_col,
+        "chart_type": chart_type
+    }
+
+    r = requests.post(
+        f"{API()}/charts/plot",
+        json=payload
+    )
+
+    if not r.ok:
+        st.error(f"Chart generation failed: {r.text}")
+        st.stop()
+
+    chart_data = r.json()
+    df_plot = pd.DataFrame({
+        x_col: chart_data["x"],
+        y_col: chart_data["y"]
+    })
+
+    st.markdown("### 📈 Chart Output")
+
+    if chart_type == "line":
+        st.line_chart(df_plot.set_index(x_col))
+    elif chart_type == "bar":
+        st.bar_chart(df_plot.set_index(x_col))
+    elif chart_type == "scatter":
+        st.scatter_chart(df_plot, x=x_col, y=y_col)
+
+
+
 
 # -------------------------------------
 # 7 REPORT (COMING SOON)
