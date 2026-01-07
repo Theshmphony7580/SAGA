@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
 import time
+from backend.api import charts, columns, columns
 from backend.config import APP_NAME, APP_VERSION, ALLOWED_ORIGINS
+# from frontend import app
 
 
 def create_app() -> FastAPI:
@@ -37,7 +39,8 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=500, content={"status": "error", "message": "Internal Server Error"})
 
     # Routers are imported lazily to avoid circular imports
-    from backend.api import upload, profile, clean, insights, nlq, report, datasets, charts
+    from backend.api import upload, profile, clean, insights, nlq, report, datasets, columns, charts_options
+
 
     # Versioned API
     api_prefix = "/v1/api"
@@ -48,7 +51,8 @@ def create_app() -> FastAPI:
     app.include_router(nlq.router, prefix=api_prefix)
     app.include_router(report.router, prefix=api_prefix)
     app.include_router(datasets.router, prefix=api_prefix)
-    app.include_router(charts.router, prefix=api_prefix)
+    app.include_router(columns.router, prefix=api_prefix)
+    app.include_router(charts_options.router, prefix=api_prefix)
 
     @app.get("/health")
     async def health():
