@@ -169,4 +169,28 @@ def delete_dataset(dataset_id: str) -> bool:
         return True
     finally:
         conn.close()
+        
+        
+def get_columns_for_dataset(dataset_id: str):
+    table = get_table_name_for_dataset(dataset_id)
+    if not table:
+        raise FileNotFoundError("Dataset not found")
+
+    df = read_dataframe_from_db(table)
+
+    columns = []
+    for col in df.columns:
+        dtype = df[col].dtype
+        if dtype.kind in {"i", "f"}:
+            col_type = "numeric"
+        else:
+            col_type = "categorical"
+
+        columns.append({
+            "name": col,
+            "type": col_type
+        })
+
+    return columns
+
 
