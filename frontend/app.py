@@ -18,7 +18,8 @@ dataset_id = st.session_state.dataset_id
 # -------------------------------------0
 # BASIC CONFIG
 # -------------------------------------
-BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000/v1/api")
+# https://hdjh9khd-8000.inc1.devtunnels.ms/
+BACKEND_URL = os.environ.get("BACKEND_URL", "https://hdjh9khd-8000.inc1.devtunnels.ms/v1/api")
 
 st.set_page_config(page_title="AI Data Agent", layout="wide")
 st.title("AI-Powered Data Analytics Assistant")
@@ -31,7 +32,7 @@ with st.sidebar:
 
 
 # -------------------------------------
-# 1️⃣ UPLOAD DATASET
+# 1️. UPLOAD DATASET
 # -------------------------------------
 st.subheader("1. Upload Dataset")
 
@@ -70,7 +71,7 @@ dataset_id = st.session_state.dataset_id
 st.write(f"**Current Dataset ID:** `{dataset_id}`")
 
 # -------------------------------------
-# 2️⃣ PROFILE DATASET
+# 2️. PROFILE DATASET
 # -------------------------------------
 st.subheader("2. Profile Dataset")
 
@@ -150,7 +151,7 @@ if "profile_response" in st.session_state:
 
 
 # -------------------------------------
-# 3️⃣ CLEANING
+# 3️. CLEANING
 # -------------------------------------
 st.subheader("3. Clean Dataset")
 
@@ -177,7 +178,7 @@ if st.button("Run Cleaning"):
 
 
 # -------------------------------------
-# 4️⃣ INSIGHTS
+# 4️. INSIGHTS
 # -------------------------------------
 st.subheader("4. Auto Insights")
 
@@ -218,7 +219,7 @@ if st.button("Generate Insights"):
 
 
 # -------------------------------------
-# 5️⃣ NLQ
+# 5️. NLQ
 # -------------------------------------
 st.subheader("5. NLQ (Ask Your Dataset)")
 
@@ -250,34 +251,12 @@ if st.button("Run NLQ"):
 
 
 # -------------------------------------
-# 6 INSIGHTS
+# 6️. FETCH DATASET COLUMNS
 # -------------------------------------
-st.subheader("6. Recommended Charts")
 
-if st.button("Recommend Charts"):
-    r = requests.get(
-        f"{API()}/charts",
-        params={"dataset_id": dataset_id}
-    )
 
-    if r.ok:
-        charts_json = r.json()
-        st.write("### Recommended Charts")
-        charts_to_tabular_display = pd.DataFrame(charts_to_tabular_display := [
-            {
-                "Chart Type": chart.get("chart_type", "N/A"),
-                "Description": chart.get("description", "N/A")
-            }
-            for chart in charts_json["charts"]
-        ])
-        st.dataframe(charts_to_tabular_display)
-    else:
-        st.error(r.text)
+st.subheader("6️. Dataset Columns")
 
-# -------------------------------------
-# 6️⃣ FETCH DATASET COLUMNS
-# -------------------------------------
-st.subheader("6️⃣ Dataset Columns")
 
 r = requests.get(
     f"{API()}/columns",
@@ -295,9 +274,9 @@ st.dataframe(cols_df, use_container_width=True)
 
 
 # -------------------------------------
-# 7️⃣ CHART CONFIGURATION
+# 7️. CHART CONFIGURATION
 # -------------------------------------
-st.subheader("7️⃣ Create Your Own Chart")
+st.subheader("7️. Create Your Own Chart")
 
 numeric_cols = [c["name"] for c in columns if c["type"] == "numeric"]
 all_cols = [c["name"] for c in columns]
@@ -307,7 +286,7 @@ if not numeric_cols:
     st.stop()
 
 x_col = st.selectbox("X Axis", all_cols)
-y_col = st.selectbox("Y Axis (Numeric)", numeric_cols)
+y_col = st.selectbox("Y Axis (Numeric)", all_cols)
 
 chart_type = st.selectbox(
     "Chart Type",
@@ -316,9 +295,9 @@ chart_type = st.selectbox(
 
 
 # -------------------------------------
-# 8️⃣ GENERATE CHART
+# 8️. GENERATE CHART
 # -------------------------------------
-if st.button("Generate Chart"):
+if st.button("8. Generate Chart"):
     payload = {
         "dataset_id": dataset_id,
         "x": x_col,
@@ -354,7 +333,7 @@ if st.button("Generate Chart"):
 
 
 # -------------------------------------
-# 7 REPORT (COMING SOON)
+# 9. EXPORT REPORT (COMING SOON)
 # -------------------------------------
-st.subheader("7. Export Report (Coming Soon)")
+st.subheader("9. Export Report (Coming Soon)")
 st.info("Report API will be added after report pipeline is complete.")
