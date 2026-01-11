@@ -5,10 +5,14 @@ from loguru import logger
 import time
 from backend.api import charts, columns, columns
 from backend.config import APP_NAME, APP_VERSION, ALLOWED_ORIGINS
+from backend.database.init_db import init_database
+
 # from frontend import app
 
 
 def create_app() -> FastAPI:
+    init_database()
+
     app = FastAPI(title=APP_NAME, version=APP_VERSION)
 
     app.add_middleware(
