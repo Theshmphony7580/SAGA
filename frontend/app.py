@@ -21,8 +21,8 @@ dataset_id = st.session_state.dataset_id
 # https://hdjh9khd-8000.inc1.devtunnels.ms/
 BACKEND_URL = os.environ.get("BACKEND_URL", "https://data-agent-neoi.onrender.com/v1/api")
 
-st.set_page_config(page_title="AI Data Agent", layout="wide")
-st.title("AI-Powered Data Analytics Assistant")
+st.set_page_config(page_title="SAGA", layout="wide")
+st.title("SAGA (Semantic & Autonomous Generative Analytics)")
 
 # Sidebar
 with st.sidebar:
