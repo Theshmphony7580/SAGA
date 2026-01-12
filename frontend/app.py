@@ -332,8 +332,3 @@ if st.button("8. Generate Chart"):
 
 
 
-# -------------------------------------
-# 9. EXPORT REPORT (COMING SOON)
-# -------------------------------------
-st.subheader("9. Export Report (Coming Soon)")
-st.info("Report API will be added after report pipeline is complete.")
