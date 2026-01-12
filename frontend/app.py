@@ -19,7 +19,7 @@ dataset_id = st.session_state.dataset_id
 # BASIC CONFIG
 # -------------------------------------
 # https://hdjh9khd-8000.inc1.devtunnels.ms/
-BACKEND_URL = os.environ.get("BACKEND_URL", "https://data-agent-neoi.onrender.com/v1/api")
+BACKEND_URL = os.environ.get("BACKEND_URL", "https://saga-u0vp.onrender.com/v1/api")
 
 st.set_page_config(page_title="SAGA", layout="wide")
 st.title("SAGA (Semantic & Autonomous Generative Analytics)")
