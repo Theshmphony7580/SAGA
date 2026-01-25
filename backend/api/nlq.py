@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 from backend.ml.nlq_engine import run_nlq
+import traceback
 
 router = APIRouter(tags=["nlq"])
 
@@ -30,6 +31,8 @@ async def nlq_run(req: NLQRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail={"error": str(e)})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print("nlq_run error:", repr(e))
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=repr(e))
 
 

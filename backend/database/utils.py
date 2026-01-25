@@ -193,4 +193,19 @@ def get_columns_for_dataset(dataset_id: str):
 
     return columns
 
+def get_table_schema(table_name):
 
+    conn = sqlite3.connect(DATABASE_FILE)
+    cur = conn.cursor()
+
+    cur.execute(f"PRAGMA table_info({table_name})")
+    cols = cur.fetchall()
+
+    conn.close()
+
+    schema = "TABLE data (\n"
+    for col in cols:
+        schema += f"  {col[1]} {col[2]},\n"
+    schema = schema.rstrip(",\n") + "\n"
+
+    return schema
