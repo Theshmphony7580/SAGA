@@ -12,6 +12,14 @@ REPORTS_DIR: str = os.path.join(ROOT_DIR, "reports")
 DATABASE_DIR = os.path.join(DATA_DIR, "db")
 DATABASE_FILE: str = os.path.join(DATABASE_DIR, "analytics.db")
 
+#models
+from dotenv import load_dotenv
+
+load_dotenv()
+
+#models
+HF_API_TOKEN = os.getenv("HF_API_TOKEN")
+
 # Upload constraints
 MAX_FILE_SIZE_MB: int = 200
 ALLOWED_EXTENSIONS: List[str] = [".csv", ".xlsx"]

@@ -28,20 +28,16 @@ def run_nlq(dataset_id: str, question: str):
         rows = cur.fetchall()
         columns = [d[0] for d in cur.description] #if cur.description else []
 
+
         if not isinstance(sql, str):
             raise ValueError("Text2SQL model returned invalid output")
         return {
             "dataset_id": dataset_id,
+            "table": cleaned_dataset_id,
             "sql": sql,
             "columns": columns,
             "rows": rows,
             "row_count": len(rows)
-            # "dataset_id": dataset_id,
-            # "table": cleaned_dataset_id,
-            # "sql": sql.strip(),
-            # "columns": columns,
-            # "rows": rows,
-            # "row_count": len(rows)
         }
         
     
