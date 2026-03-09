@@ -16,21 +16,25 @@ def run_nlq(dataset_id: str, question: str):
     """
 
     cleaned_dataset_id = resolve_best_table_name(dataset_id)
-    # cleaned_dataset_id = find_cleaned_dataset_id(dataset_id) #or dataset_id
     schema = get_table_schema(cleaned_dataset_id)
+    print(f"[NLQ] Schema for table '{cleaned_dataset_id}':\n{schema}")
+
     raw_sql = generate_sql(schema, question)
+    print(f"[NLQ] Raw SQL from model: {raw_sql!r}")
+
+    if not isinstance(raw_sql, str) or not raw_sql.strip():
+        raise ValueError("Text2SQL model returned invalid or empty output")
+
     sql = validate_sql(raw_sql)
+    print(f"[NLQ] Sanitized SQL: {sql}")
 
     conn = sqlite3.connect(DATABASE_FILE)
     try:
         cur = conn.cursor()
         cur.execute(sql)
         rows = cur.fetchall()
-        columns = [d[0] for d in cur.description] #if cur.description else []
+        columns = [d[0] for d in cur.description] if cur.description else []
 
-
-        if not isinstance(sql, str):
-            raise ValueError("Text2SQL model returned invalid output")
         return {
             "dataset_id": dataset_id,
             "table": cleaned_dataset_id,
@@ -39,8 +43,7 @@ def run_nlq(dataset_id: str, question: str):
             "rows": rows,
             "row_count": len(rows)
         }
-        
-    
+
     finally:
         conn.close()
 
