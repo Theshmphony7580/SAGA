@@ -17,8 +17,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-#models
+# LLM API Keys
 HF_API_TOKEN = os.getenv("HF_API_TOKEN")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Ollama (local LLM) — PLACEHOLDER: uncomment when ready to add Ollama
+# OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+# OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
+
+# Agent config
+SCHEMA_SAMPLE_ROWS: int = 3  # Number of sample rows to include in schema context for LLM
+
+# LLM Model selection
+GEMINI_FAST_MODEL: str = "gemini-2.0-flash"              # For routing, classification
+GEMINI_POWER_MODEL: str = "gemini-2.0-flash"  # For code gen, deep analysis
 
 # Upload constraints
 MAX_FILE_SIZE_MB: int = 200
@@ -34,6 +46,9 @@ ALLOWED_MIME_TYPES: List[str] = [
 
 # CORS
 ALLOWED_ORIGINS: List[str] = ["http://localhost:8501", "http://127.0.0.1:8501"]
+
+# WebSocket
+WS_MAX_MESSAGE_SIZE: int = 1024 * 64  # 64KB max per message
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(REPORTS_DIR, exist_ok=True)
