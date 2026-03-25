@@ -1,0 +1,14 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# .env
+# *.pyc
+.env
+
+.venv
+
+.venv
+
+.venv/Lib/site-packages/_cffi_backend.cp313-win_amd64.pyd
+*.pyc
+*.pyc
+*.cpython-313.pyc
+*.pyd
