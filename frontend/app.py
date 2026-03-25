@@ -19,7 +19,7 @@ dataset_id = st.session_state.dataset_id
 # BASIC CONFIG
 # -------------------------------------
 # https://hdjh9khd-8000.inc1.devtunnels.ms/
-BACKEND_URL = os.environ.get("BACKEND_URL", "https://saga-u0vp.onrender.com/v1/api")
+BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000/v1/api")
 
 st.set_page_config(page_title="SAGA", layout="wide")
 st.title("SAGA (Semantic & Autonomous Generative Analytics)")
@@ -219,34 +219,67 @@ if st.button("Generate Insights"):
 
 
 # -------------------------------------
-# 5️. NLQ
+# 5️. NLQ (LangGraph AI Swarm Test via WebSockets)
 # -------------------------------------
-st.subheader("5. NLQ (Ask Your Dataset)")
+st.subheader("5. Ask the LangGraph Data Swarm")
 
-question = st.text_input("Ask a question about your data:")
+question = st.text_input("Ask a question about your data (e.g. 'Plot the distribution of salaries'):")
 
-if st.button("Run NLQ"):
-    r = requests.post(
-        f"{API()}/nlq/run",
-        json={"dataset_id": dataset_id, "question": question}
-    )
+if st.button("Run SAGA AI Swarm"):
+    import json
+    import plotly.io as pio
+    try:
+        from websockets.sync.client import connect
+    except ImportError:
+        st.error("Please run `pip install websockets` in your terminal first.")
+        st.stop()
 
-    if r.ok:
-        data = r.json()
-        # st.markdown("### Generated SQL")
-        # st.code(data["sql"], language="sql")
-        
-        # if data.get("result_summary"):
-        #     st.info(data["result_summary"])
-
-        if data["rows"]:
-            df = pd.DataFrame(data["rows"], columns=data["columns"])
-            st.markdown(f"### Result ({data['row_count']} rows)")
-            st.dataframe(df)
-        else:
-            st.info("Query executed successfully, but returned no rows.")
-    else:
-        st.error(r.text)
+    # Convert http://.../v1/api to ws://.../v1/api/ws/chat
+    ws_url = API().replace("http://", "ws://").replace("https://", "wss://") + "/ws/chat"
+    
+    with st.spinner("Connecting to LangGraph Swarm via WebSockets..."):
+        try:
+            with connect(ws_url) as websocket:
+                payload = {
+                    "action": "query",
+                    "dataset_id": dataset_id,
+                    "message": question
+                }
+                websocket.send(json.dumps(payload))
+                
+                # Container for live streaming
+                chat_container = st.container()
+                
+                while True:
+                    msg = websocket.recv()
+                    data = json.loads(msg)
+                    
+                    event_type = data.get("type", "")
+                    agent = data.get("agent", "Unknown")
+                    content = data.get("content", "")
+                    
+                    if event_type == "status":
+                        chat_container.info(f"🤖 **[{agent}]**: {content}")
+                    elif event_type == "thought":
+                        with chat_container.expander(f"🧠 {agent} Thought"):
+                            if "SELECT" in str(content).upper():
+                                st.code(content, language="sql")
+                            else:
+                                st.code(content)
+                    elif event_type == "token":
+                        chat_container.markdown(content)
+                    elif event_type == "chart":
+                        # content is a Plotly dict
+                        fig = pio.from_json(json.dumps(content))
+                        chat_container.plotly_chart(fig, use_container_width=True)
+                    elif event_type == "error":
+                        chat_container.error(f"❌ **[{agent}] Error:** {content}")
+                        st.stop()
+                    elif event_type == "final_answer":
+                        chat_container.success(f"✅ **Done:** {content}")
+                        break
+        except Exception as e:
+            st.error(f"WebSocket Error: {str(e)}")
 
 
 
