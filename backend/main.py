@@ -58,6 +58,10 @@ def create_app() -> FastAPI:
     app.include_router(columns.router, prefix=api_prefix)
     app.include_router(charts_options.router, prefix=api_prefix)
 
+    # WebSocket endpoint for real-time AI chat
+    from backend.api.websocket_chat import create_websocket_route
+    create_websocket_route(app)
+
     @app.get("/health")
     async def health():
         return {"status": "ok", "version": APP_VERSION}
