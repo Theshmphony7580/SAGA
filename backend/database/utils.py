@@ -21,7 +21,12 @@ def load_dataframe_to_db(df: pd.DataFrame, table_name: str, if_exists: str = "re
     """
     conn = get_db_connection()
     try:
-        df.to_sql(table_name, conn, if_exists=if_exists, index=False)
+        # SQLite defaults to a max of 999 variables per query in many environments.
+        # To use method="multi" safely, we dynamically calculate chunksize:
+        num_cols = len(df.columns)
+        safe_chunksize = max(1, 900 // num_cols)
+        
+        df.to_sql(table_name, conn, if_exists=if_exists, index=False, method="multi", chunksize=safe_chunksize)
     finally:
         conn.close()
 
@@ -203,9 +208,9 @@ def get_table_schema(table_name):
 
     conn.close()
 
-    schema = "TABLE data (\n"
+    schema = f"TABLE {table_name} (\n"
     for col in cols:
         schema += f"  {col[1]} {col[2]},\n"
-    schema = schema.rstrip(",\n") + "\n"
+    schema = schema.rstrip(",\n") + "\n)"
 
     return schema
